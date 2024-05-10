@@ -11,6 +11,27 @@
 
 
 
+USTRUCT(BlueprintType)
+struct FTilesData
+{
+	GENERATED_BODY();
+
+
+	UPROPERTY(VisibleAnywhere, Category = "Tile")
+	bool isAvailable = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Tile")
+	bool isObstacle = false;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Tile")
+	FVector worldLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
+	FVector2D gridIdx = FVector2D::ZeroVector;
+
+
+};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GRIDMAPPING_API UGridComponent : public USceneComponent
@@ -30,21 +51,25 @@ private:
 
 public:
 	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grid")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grid Properties | Tiles ")
 	float tileSize;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debug")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Debug")
 	float debugThickness;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Tiles", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
 	float spacingTiles;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Collision")
 	TEnumAsByte<ETraceTypeQuery> groundChannel;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Collision")
 	TEnumAsByte<ETraceTypeQuery> obstacleChannel;
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Tiles")
+	TMap<FVector2D,FTilesData> tilesData;
+	
 	//Methods//
 public:	
 	
@@ -65,14 +90,18 @@ public:
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Debug", meta= (AutoCreateRefTerm = "borderGridColor"))
+	virtual void OnComponentCreated() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Debug", meta= (AutoCreateRefTerm = "borderGridColor"))
 	void DrawGrid(const FLinearColor &borderGridColor);
 	
-	UFUNCTION(BlueprintPure, Category = "Grid")
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
 	FVector2D GetTileCount();
 
-	UFUNCTION(BlueprintPure, Category = "Grid")
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Collision")
 	bool IsTileCollision(FVector locationTile, ETraceTypeQuery traceChannel);
 
+	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
+	void CreateGridData();
 
 };

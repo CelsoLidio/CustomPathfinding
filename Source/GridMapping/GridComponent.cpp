@@ -15,6 +15,15 @@ UGridComponent::UGridComponent()
 	tileSize = 50.0f;
 	debugThickness = 4.0f;
 	spacingTiles = 0.5f;
+
+	
+}
+
+
+void UGridComponent::OnComponentCreated()
+{
+	InitGrid();
+	CreateGridData();
 }
 
 
@@ -51,35 +60,30 @@ void UGridComponent::DrawAllTiles()
 	FQuat gridRot = FQuat(GetOwner()->GetActorRotation());
 	const float clampSpacing = FMath::Lerp<float, float>(0.1f, 0.9f, spacingTiles);
 
-	printf("%f", clampSpacing);
 
-	for (int gridX = 0; gridX <= GetTileCount().X; gridX++)
+	TArray<FVector2D> tilesIdx;
+	tilesData.GetKeys(tilesIdx);
+
+
+	for (FVector2D eachKey : tilesIdx)
 	{
-		for (int gridY = 0; gridY <= GetTileCount().Y; gridY++)
+		//printf("%s", *eachKey.ToString());
+		FTilesData* currTile = tilesData.Find(eachKey);
+
+		if (currTile->isAvailable)
 		{
-			float centerX = (gridX * (tileSize * 2)) + tileSize;
-			float centerY = (gridY * (tileSize * 2)) + tileSize;
-
-			FVector TileX = GetOwner()->GetActorRightVector() * centerX;
-			FVector TileY = GetOwner()->GetActorForwardVector() * centerY;
-
-			FVector TileLoc = GetBottomPivot() + TileX + TileY;
-
-			if (IsTileCollision(TileLoc,groundChannel))
+			if (!currTile->isObstacle)
 			{
-				if (!IsTileCollision(TileLoc, obstacleChannel))
-				{
-					DrawDebugBox(GetWorld(), TileLoc, FVector(tileSize, tileSize, gridWorldSize.Z) * clampSpacing, gridRot, FColor::Yellow, true, -1, 0.0f, debugThickness);
-				}
-				else
-				{
-					DrawDebugBox(GetWorld(), TileLoc, FVector(tileSize, tileSize, gridWorldSize.Z) * clampSpacing, gridRot, FColor::Red, true, -1, 0.0f, debugThickness);
-				}
+				DrawDebugBox(GetWorld(), currTile->worldLocation, FVector(tileSize, tileSize, gridWorldSize.Z) * clampSpacing, gridRot, FColor::Yellow, true, -1, 0.0f, debugThickness);
 			}
-
-			
+			else
+			{
+				DrawDebugBox(GetWorld(), currTile->worldLocation, FVector(tileSize, tileSize, gridWorldSize.Z) * clampSpacing, gridRot, FColor::Red, true, -1, 0.0f, debugThickness);
+			}
 		}
+
 	}
+
 
 }
 
@@ -90,10 +94,9 @@ void UGridComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+
 void UGridComponent::DrawGrid(const FLinearColor& borderGridColor)
 {
-	
-	InitGrid();
 	
 	FlushPersistentDebugLines(GetWorld());
 
@@ -130,5 +133,47 @@ bool UGridComponent::IsTileCollision(FVector locationTile, ETraceTypeQuery trace
 	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), locationTile, locationTile, tileSize * clampSpacing, traceChannel, false, ignoreActors, EDrawDebugTrace::None, hitTrace, true);
 
 	return hitTrace.bBlockingHit;
+}
+
+void UGridComponent::CreateGridData()
+{
+	
+
+	for (int gridX = 0; gridX <= GetTileCount().X; gridX++)
+	{
+		for (int gridY = 0; gridY <= GetTileCount().Y; gridY++)
+		{
+			float centerX = (gridX * (tileSize * 2)) + tileSize;
+			float centerY = (gridY * (tileSize * 2)) + tileSize;
+
+			FVector TileX = GetOwner()->GetActorRightVector() * centerX;
+			FVector TileY = GetOwner()->GetActorForwardVector() * centerY;
+
+			FVector TileLoc = GetBottomPivot() + TileX + TileY;
+
+			FVector2D idxGrid = FVector2D(gridX, gridY);
+
+			FTilesData currTile = FTilesData();
+
+			currTile.gridIdx = idxGrid;
+			currTile.worldLocation = TileLoc;
+
+			if (IsTileCollision(TileLoc, groundChannel))
+			{
+				currTile.isAvailable = true;
+
+				if (IsTileCollision(TileLoc, obstacleChannel))
+				{
+					currTile.isObstacle = true;
+				}
+				
+			}
+
+
+			tilesData.Add(idxGrid, currTile);
+
+		}
+	}
+
 }
 
