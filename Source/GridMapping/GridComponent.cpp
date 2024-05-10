@@ -177,3 +177,37 @@ void UGridComponent::CreateGridData()
 
 }
 
+FVector2D UGridComponent::GetValidClosestTile(FVector targetPosition)
+{
+	TArray<FVector2D> tilesIdx;
+	tilesData.GetKeys(tilesIdx);
+
+	FTilesData resultTile ;
+
+	
+	float lastDist = TNumericLimits<float>::Max();
+
+
+	for (FVector2D eachKey : tilesIdx)
+	{
+		FTilesData* currTile = tilesData.Find(eachKey);
+
+		if (!currTile->isAvailable ||  currTile->isObstacle)
+		{
+			continue;
+		}
+
+		FVector tileLoc = currTile->worldLocation;
+
+		if (FVector::Distance(resultTile.worldLocation, currTile->worldLocation) < lastDist)
+		{
+			resultTile = *currTile;
+		}
+
+	}
+
+	FVector2D resultIdx = resultTile.gridIdx;
+
+	return resultIdx;
+}
+

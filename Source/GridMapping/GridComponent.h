@@ -12,10 +12,10 @@
 
 
 USTRUCT(BlueprintType)
-struct FTilesData
+struct GRIDMAPPING_API FTilesData
 {
 	GENERATED_BODY();
-
+public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Tile")
 	bool isAvailable = false;
@@ -79,11 +79,13 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-
+	//Create Grid//
 	void InitGrid();
 
+	//Get new Pivot Grid//
 	FVector GetBottomPivot();
 
+	//Draw Debug Tiles//
 	void DrawAllTiles();
 
 public:	
@@ -103,5 +105,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
 	void CreateGridData();
+
+	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
+	FVector2D GetValidClosestTile(FVector targetPosition);
 
 };
