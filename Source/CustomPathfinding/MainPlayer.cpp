@@ -7,6 +7,8 @@
 
 #include "PrintStrings.h"
 
+
+
 // Sets default values
 AMainPlayer::AMainPlayer()
 {
@@ -17,7 +19,7 @@ AMainPlayer::AMainPlayer()
 	//Create SpringArm//
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
-
+	SpringArm->bDoCollisionTest = false;
 
 	//Create Camera//
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
@@ -25,6 +27,9 @@ AMainPlayer::AMainPlayer()
 
 
 	GetCharacterMovement()->GravityScale = 0.0f;
+	lookSensibility = 70.0f;
+	rotCameraYawMin = -90;
+	rotCameraYawMax = 90;
 
 }
 
@@ -35,16 +40,12 @@ void AMainPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	initPlayer();
 
 }
 
 void AMainPlayer::OnConstruction(const FTransform& Transform)
 {
-	if (IsValid(objGrid))
-	{
-		currGrid = objGrid->GetComponentByClass<UGridComponent>();
-	}
 	
 	//GetCharacterMovement()->GravityScale = 0.0f;
 }
@@ -61,35 +62,86 @@ void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (UEnhancedInputComponent* enhancedInput = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+
+		enhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainPlayer::LookPlayer);
+
+		enhancedInput->BindAction(ClickAction, ETriggerEvent::Started, this, &AMainPlayer::RaycastClick);
+	}
+
+
 }
 
 void AMainPlayer::initPlayer()
 {
-
-	if (IsValid(objGrid))
-	{
-		currGrid = objGrid->GetComponentByClass<UGridComponent>();
-	}
+	FVector initLoc = AGridManager::WorldLocationToTileLocation(GetActorLocation());
+	FVector gridLoc = AGridManager::GetLocationGrid(GetActorLocation());
 
 	
+	SetActorLocation(initLoc);
+	FRotator lookAtGrid = (GetActorLocation() - gridLoc).Rotation().Clamp();
 
-	if (!IsValid(currGrid))
+	//printf("look at grid = %s", *lookAtGrid.ToString());
+	float offsetYaw= 90;
+
+	if (lookAtGrid.Yaw <= 270)
+	{
+		offsetYaw = -90;
+	}
+	
+	SetActorRotation(FRotator(GetActorRotation().Pitch, lookAtGrid.Yaw + offsetYaw, GetActorRotation().Roll));
+	
+}
+
+
+void AMainPlayer::LookPlayer(const FInputActionValue& valueInput)
+{
+	if (GetController() == nullptr)
 	{
 		return;
 	}
 
+	FVector2D axisVector = valueInput.Get<FVector2D>() * lookSensibility * GetWorld()->GetDeltaSeconds();
 
 
+	SpringArm->AddLocalRotation(FRotator(0, axisVector.X, 0));
 
+	float yawCam = FMath::Clamp(SpringArm->GetRelativeRotation().Yaw, rotCameraYawMin, rotCameraYawMax);
 
-	FVector2D initidx = currGrid->GetValidClosestTile(GetActorLocation());
+	SpringArm->SetRelativeRotation(FRotator(SpringArm->GetRelativeRotation().Pitch, yawCam, SpringArm->GetRelativeRotation().Roll));
 
-	//FVector2D idxTile = initTile.gridIdx;
-	printf("test = %s", *initidx.ToString());
-
-	/*FVector initPos = currGrid->tilesData.Find(FVector2D(0, 0))->worldLocation;
-
-	SetActorLocation(initPos);*/
 
 }
 
+
+
+
+void AMainPlayer::RaycastClick(const FInputActionValue& valueInput)
+{
+	bool isClicked = valueInput.Get<bool>();
+
+	if (isClicked)
+	{
+		FHitResult hitCursor;
+		
+		APlayerController* pController = Cast<APlayerController>(GetController());
+		
+		pController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, hitCursor);
+
+		if (hitCursor.bBlockingHit)
+		{
+			//printf("actor Hit = %s", *hitCursor.ImpactPoint.ToString());
+
+			FVector tileLoc = AGridManager::WorldLocationToTileLocation(hitCursor.ImpactPoint);
+
+			printf("tile location = %s", *tileLoc.ToString());
+		}
+		else
+		{
+			print("NOT hitted");
+		}
+	}
+
+
+}

@@ -6,13 +6,16 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "../GridMapping/GridComponent.h"
-
+#include "GridMapping/GridManager.h"
+#include "Components/InputComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubSystems.h"
 
 
 #include "MainPlayer.generated.h"
 
-
+class UInputAction;
+class UInputMappingContext;
 
 UCLASS()
 class CUSTOMPATHFINDING_API AMainPlayer : public ACharacter
@@ -22,36 +25,48 @@ class CUSTOMPATHFINDING_API AMainPlayer : public ACharacter
 
 public:
 
+
+	//Components//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* PlayerCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
-	AActor* objGrid;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float lookSensibility;
 
 
-protected:
+	//Actions player input//
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* LookAction;
 
-	UGridComponent* currGrid = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* ClickAction;
+
+	//Variables//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = -90.0, ClampMax = 0.0))
+	float rotCameraYawMin;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = 0.0, ClampMax = 90.0))
+	float rotCameraYawMax;
+
+
+private:
+
+	//Actions Method//
+	void LookPlayer(const FInputActionValue& valueInput);
+	void RaycastClick(const FInputActionValue& valueInput);
 
 public:
 
 	AMainPlayer();
 
-public:
-
 	virtual void BeginPlay() override;
-
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-
-public:	
-
 	virtual void Tick(float DeltaTime) override;
-
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

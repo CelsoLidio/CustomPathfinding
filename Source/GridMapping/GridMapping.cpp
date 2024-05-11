@@ -3,4 +3,4 @@
 #include "GridMapping.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_MODULE( FDefaultGameModuleImpl, GridMapping);
+IMPLEMENT_MODULE( FDefaultModuleImpl, GridMapping);

@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+
 #include "GridComponent.generated.h"
 
 
@@ -107,6 +108,12 @@ public:
 	void CreateGridData();
 
 	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
-	FVector2D GetValidClosestTile(FVector targetPosition);
+	FTilesData GetValidClosestTile(FVector targetPosition);
+
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
+	bool IsAvailableGrid();
+
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
+	FVector GetGridLocation();
 
 };

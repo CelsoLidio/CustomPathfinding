@@ -2,6 +2,8 @@
 
 
 #include "GridComponent.h"
+#include "GridManager.h"
+
 #include "PrintStrings.h"
 
 
@@ -32,7 +34,7 @@ void UGridComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	gridLocation = GetOwner()->GetActorLocation();
+	AGridManager::AddGrid(this);
 	
 }
 
@@ -135,6 +137,31 @@ bool UGridComponent::IsTileCollision(FVector locationTile, ETraceTypeQuery trace
 	return hitTrace.bBlockingHit;
 }
 
+bool UGridComponent::IsAvailableGrid()
+{
+	TArray<FVector2D> tilesIdx;
+	tilesData.GetKeys(tilesIdx);
+
+
+	for (FVector2D eachKey : tilesIdx)
+	{
+		FTilesData* currTile = tilesData.Find(eachKey);
+
+		if (currTile->isAvailable && !currTile->isObstacle)
+		{
+			return true;
+		}
+
+	}
+
+	return false;
+}
+
+FVector UGridComponent::GetGridLocation()
+{
+	return gridLocation;
+}
+
 void UGridComponent::CreateGridData()
 {
 	
@@ -177,37 +204,49 @@ void UGridComponent::CreateGridData()
 
 }
 
-FVector2D UGridComponent::GetValidClosestTile(FVector targetPosition)
+FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
 {
 	TArray<FVector2D> tilesIdx;
 	tilesData.GetKeys(tilesIdx);
 
-	FTilesData resultTile ;
+	FTilesData resultTile;
 
 	
-	float lastDist = TNumericLimits<float>::Max();
-
-
+	float minorDist = TNumericLimits<float>::Max();
+	int count = 0;
+	
 	for (FVector2D eachKey : tilesIdx)
 	{
 		FTilesData* currTile = tilesData.Find(eachKey);
 
-		if (!currTile->isAvailable ||  currTile->isObstacle)
+		if (!currTile->isAvailable || currTile->isObstacle)
 		{
 			continue;
 		}
 
-		FVector tileLoc = currTile->worldLocation;
 
-		if (FVector::Distance(resultTile.worldLocation, currTile->worldLocation) < lastDist)
+		float currDist = FVector::Distance(targetPosition, currTile->worldLocation);
+
+		count++;
+
+		if (currDist < tileSize)
 		{
+			
+			resultTile = *currTile;
+			printf("count = %i", count);
+			return resultTile;
+		}
+
+		if (currDist < minorDist)
+		{
+			minorDist = currDist;
 			resultTile = *currTile;
 		}
 
 	}
 
-	FVector2D resultIdx = resultTile.gridIdx;
-
-	return resultIdx;
+	printf("count = %i", count);
+	//printf("%s", *resultTile.gridIdx.ToString());
+	return resultTile;
 }
 

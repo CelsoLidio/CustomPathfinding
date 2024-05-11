@@ -3,4 +3,4 @@
 #include "PathFinding.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_MODULE( FDefaultGameModuleImpl, PathFinding);
+IMPLEMENT_MODULE( FDefaultModuleImpl, PathFinding);

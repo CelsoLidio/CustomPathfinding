@@ -4,7 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "EnhancedInputSubSystems.h"
+
 #include "MainController.generated.h"
+
+
+class UInputMappingContext;
+
 
 /**
  * 
@@ -17,10 +23,27 @@ class CUSTOMPATHFINDING_API AMainController : public APlayerController
 	AMainController();
 
 
+public:
+
+	//Mapping Input//
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputMappingContext* PlayerMappingInput;
+
+
+	
+
+private:
+
+
+
 protected:
 
 	virtual void BeginPlay() override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+
+	UEnhancedInputLocalPlayerSubsystem* subsystemController;
+
 
 };
