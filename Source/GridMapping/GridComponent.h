@@ -89,11 +89,18 @@ protected:
 	//Draw Debug Tiles//
 	void DrawAllTiles();
 
+	
+
 public:	
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void OnComponentCreated() override;
+
+
+
+public:
+
 
 	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Debug", meta= (AutoCreateRefTerm = "borderGridColor"))
 	void DrawGrid(const FLinearColor &borderGridColor);
@@ -108,12 +115,20 @@ public:
 	void CreateGridData();
 
 	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
-	FTilesData GetValidClosestTile(FVector targetPosition);
+	FTilesData GetClosestTile(FVector targetPosition, bool isOnlyValid = true);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
+	FTilesData GetTileData(FVector2D idxTile);
+
 
 	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
 	bool IsAvailableGrid();
 
 	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
 	FVector GetGridLocation();
+
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
+	TArray<FVector2D> GetAllGridIdx();
+
 
 };

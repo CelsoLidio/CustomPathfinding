@@ -22,14 +22,14 @@ UGridComponent::UGridComponent()
 }
 
 
+//Override Methods//
+
 void UGridComponent::OnComponentCreated()
 {
 	InitGrid();
 	CreateGridData();
 }
 
-
-// Called when the game starts
 void UGridComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -37,6 +37,14 @@ void UGridComponent::BeginPlay()
 	AGridManager::AddGrid(this);
 	
 }
+
+void UGridComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+
+//Protected Methods//
 
 void UGridComponent::InitGrid()
 {
@@ -90,12 +98,58 @@ void UGridComponent::DrawAllTiles()
 }
 
 
-// Called every frame
-void UGridComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+//Public Methods//
+
+void UGridComponent::CreateGridData()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+
+	for (int gridX = 0; gridX <= GetTileCount().X; gridX++)
+	{
+		for (int gridY = 0; gridY <= GetTileCount().Y; gridY++)
+		{
+			float centerX = (gridX * (tileSize * 2)) + tileSize;
+			float centerY = (gridY * (tileSize * 2)) + tileSize;
+
+			FVector TileX = GetOwner()->GetActorRightVector() * centerX;
+			FVector TileY = GetOwner()->GetActorForwardVector() * centerY;
+
+			FVector TileLoc = GetBottomPivot() + TileX + TileY;
+
+			FVector2D idxGrid = FVector2D(gridX, gridY);
+
+			FTilesData currTile = FTilesData();
+
+			currTile.gridIdx = idxGrid;
+			currTile.worldLocation = TileLoc;
+
+
+			if (IsTileCollision(TileLoc, groundChannel))
+			{
+				currTile.isAvailable = true;
+
+				if (IsTileCollision(TileLoc, obstacleChannel))
+				{
+					currTile.isObstacle = true;
+				}
+
+			}
+
+
+			tilesData.Add(idxGrid, currTile);
+
+		}
+	}
+
 }
 
+TArray<FVector2D> UGridComponent::GetAllGridIdx()
+{
+	TArray<FVector2D> allGridIdx;
+	tilesData.GetKeys(allGridIdx);
+
+	return allGridIdx;
+}
 
 void UGridComponent::DrawGrid(const FLinearColor& borderGridColor)
 {
@@ -162,49 +216,7 @@ FVector UGridComponent::GetGridLocation()
 	return gridLocation;
 }
 
-void UGridComponent::CreateGridData()
-{
-	
-
-	for (int gridX = 0; gridX <= GetTileCount().X; gridX++)
-	{
-		for (int gridY = 0; gridY <= GetTileCount().Y; gridY++)
-		{
-			float centerX = (gridX * (tileSize * 2)) + tileSize;
-			float centerY = (gridY * (tileSize * 2)) + tileSize;
-
-			FVector TileX = GetOwner()->GetActorRightVector() * centerX;
-			FVector TileY = GetOwner()->GetActorForwardVector() * centerY;
-
-			FVector TileLoc = GetBottomPivot() + TileX + TileY;
-
-			FVector2D idxGrid = FVector2D(gridX, gridY);
-
-			FTilesData currTile = FTilesData();
-
-			currTile.gridIdx = idxGrid;
-			currTile.worldLocation = TileLoc;
-
-			if (IsTileCollision(TileLoc, groundChannel))
-			{
-				currTile.isAvailable = true;
-
-				if (IsTileCollision(TileLoc, obstacleChannel))
-				{
-					currTile.isObstacle = true;
-				}
-				
-			}
-
-
-			tilesData.Add(idxGrid, currTile);
-
-		}
-	}
-
-}
-
-FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
+FTilesData UGridComponent::GetClosestTile(FVector targetPosition, bool isOnlyValid)
 {
 	TArray<FVector2D> tilesIdx;
 	tilesData.GetKeys(tilesIdx);
@@ -219,11 +231,15 @@ FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
 	{
 		FTilesData* currTile = tilesData.Find(eachKey);
 
-		if (!currTile->isAvailable || currTile->isObstacle)
+		if (isOnlyValid)
 		{
-			continue;
-		}
+			if (!currTile->isAvailable || currTile->isObstacle)
+			{
+				continue;
+			}
 
+		}
+		
 
 		float currDist = FVector::Distance(targetPosition, currTile->worldLocation);
 
@@ -246,5 +262,10 @@ FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
 
 	//printf("%s", *resultTile.gridIdx.ToString());
 	return resultTile;
+}
+
+FTilesData UGridComponent::GetTileData(FVector2D idxTile)
+{
+	return *tilesData.Find(idxTile);
 }
 

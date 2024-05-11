@@ -2,25 +2,25 @@
 
 
 #include "PathAgentComponent.h"
+#include "PrintStrings.h"
+
 
 // Sets default values for this component's properties
 UPathAgentComponent::UPathAgentComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	pathFindingInst = NewObject<UPathSearchAStar>();
 }
 
 
-// Called when the game starts
+
 void UPathAgentComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
 	
+	
+
 }
 
 
@@ -28,7 +28,25 @@ void UPathAgentComponent::BeginPlay()
 void UPathAgentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
-	// ...
+void UPathAgentComponent::CreatePointNodes(FPointData pointNode)
+{
+
+	pathFindingInst->AddNode(pointNode.pointIdx, pointNode.isAvailablePoint);
+
+
+	printf("dict Nodes = %i", pathFindingInst->GetAllNodes().Find(FVector2D(0,0))->nodeCost);
+	//printf("dict Nodes = %i", pathFindingInst->GetAllNodes().GetMaxIndex());
+}
+
+
+
+
+TArray<FVector2D> UPathAgentComponent::FindPath(FVector2D startNodeIdx, FVector2D endNodeIdx)
+{
+
+
+	return TArray<FVector2D>();
 }
 
