@@ -213,7 +213,7 @@ FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
 
 	
 	float minorDist = TNumericLimits<float>::Max();
-	int count = 0;
+
 	
 	for (FVector2D eachKey : tilesIdx)
 	{
@@ -227,13 +227,12 @@ FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
 
 		float currDist = FVector::Distance(targetPosition, currTile->worldLocation);
 
-		count++;
 
 		if (currDist < tileSize)
 		{
 			
 			resultTile = *currTile;
-			printf("count = %i", count);
+			
 			return resultTile;
 		}
 
@@ -245,7 +244,6 @@ FTilesData UGridComponent::GetValidClosestTile(FVector targetPosition)
 
 	}
 
-	printf("count = %i", count);
 	//printf("%s", *resultTile.gridIdx.ToString());
 	return resultTile;
 }

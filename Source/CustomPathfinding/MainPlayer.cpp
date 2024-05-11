@@ -77,6 +77,7 @@ void AMainPlayer::initPlayer()
 {
 	FVector initLoc = AGridManager::WorldLocationToTileLocation(GetActorLocation());
 	FVector gridLoc = AGridManager::GetLocationGrid(GetActorLocation());
+	
 
 	
 	SetActorLocation(initLoc);
@@ -135,7 +136,11 @@ void AMainPlayer::RaycastClick(const FInputActionValue& valueInput)
 
 			FVector tileLoc = AGridManager::WorldLocationToTileLocation(hitCursor.ImpactPoint);
 
-			printf("tile location = %s", *tileLoc.ToString());
+			FVector2D tileIdx = AGridManager::GetTileAtLocation(hitCursor.ImpactPoint);
+
+			printf("tile location = %s", *tileIdx.ToString())
+
+			
 		}
 		else
 		{

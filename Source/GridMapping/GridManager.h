@@ -50,8 +50,13 @@ public:
 	static void AddGrid(UGridComponent* newGrid);
 
 	
+	UFUNCTION(BlueprintPure, Category = "GridManager | Grid")
 	static FVector GetLocationGrid(FVector targetLoc);
+
+	UFUNCTION(BlueprintPure, Category = "GridManager | Tiles")
 	static FVector WorldLocationToTileLocation(FVector worldLocation);
+
+	UFUNCTION(BlueprintPure, Category = "GridManager | Tiles")
 	static FVector2D GetTileAtLocation(FVector worldLocation);
 
 
