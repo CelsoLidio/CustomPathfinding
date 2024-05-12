@@ -250,7 +250,7 @@ TArray<FVector2D> AGridManager::GetAllTileAtLocation(FVector worldLocation)
 
 bool AGridManager::isTileAvailableFromLoc(FVector worldLocation)
 {
-	FTilesData currTile = GetTileFromWorldLoc(worldLocation, false);
+	FTilesData currTile = GetTileFromWorldLoc(worldLocation, true);
 
 	if (currTile.isAvailable && !currTile.isObstacle)
 	{

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+
 #include "PathSearchAStar.h"
 
 #include "PathAgentComponent.generated.h"
@@ -51,11 +52,8 @@ public:
 	void CreatePointNodes(FPointData pointNode);
 
 
-	UFUNCTION(BlueprintPure, Category = "PathFinding | Path")
-	TArray<FVector2D> FindPath(FVector2D startNodeIdx, FVector2D endNodeIdx);
-
-
-
+	UFUNCTION(BlueprintCallable, Category = "PathFinding | Path")
+	TArray<FVector2D> FindPath(FVector2D startNode, FVector2D targetNode);
 
 
 };

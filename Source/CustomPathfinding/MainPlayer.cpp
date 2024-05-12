@@ -134,11 +134,13 @@ void AMainPlayer::RaycastClick(const FInputActionValue& valueInput)
 		{
 			//printf("actor Hit = %s", *hitCursor.ImpactPoint.ToString());
 
-			FVector tileLoc = AGridManager::WorldLocationToTileLocation(hitCursor.ImpactPoint);
+			CursorRaycast(hitCursor.ImpactPoint);
+
+			/*FVector tileLoc = AGridManager::WorldLocationToTileLocation(hitCursor.ImpactPoint);
 
 			FVector2D tileIdx = AGridManager::GetTileAtLocation(hitCursor.ImpactPoint);
 
-			printf("tile location = %s", *tileIdx.ToString())
+			printf("tile location = %s", *tileIdx.ToString())*/
 
 			
 		}

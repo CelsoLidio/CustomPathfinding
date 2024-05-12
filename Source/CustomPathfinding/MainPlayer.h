@@ -56,8 +56,8 @@ private:
 
 	//Actions Method//
 	void LookPlayer(const FInputActionValue& valueInput);
+	
 	void RaycastClick(const FInputActionValue& valueInput);
-
 public:
 
 	AMainPlayer();
@@ -72,5 +72,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void initPlayer();
-
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
+	void CursorRaycast(FVector impactPoint);
 };

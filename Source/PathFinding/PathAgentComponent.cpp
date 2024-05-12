@@ -2,6 +2,8 @@
 
 
 #include "PathAgentComponent.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "PrintStrings.h"
 
 
@@ -15,11 +17,10 @@ UPathAgentComponent::UPathAgentComponent()
 
 
 
+
 void UPathAgentComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	
 
 }
 
@@ -35,18 +36,22 @@ void UPathAgentComponent::CreatePointNodes(FPointData pointNode)
 
 	pathFindingInst->AddNode(pointNode.pointIdx, pointNode.isAvailablePoint);
 
-
-	printf("dict Nodes = %i", pathFindingInst->GetAllNodes().Find(FVector2D(0,0))->nodeCost);
 	//printf("dict Nodes = %i", pathFindingInst->GetAllNodes().GetMaxIndex());
 }
 
 
 
 
-TArray<FVector2D> UPathAgentComponent::FindPath(FVector2D startNodeIdx, FVector2D endNodeIdx)
+TArray<FVector2D> UPathAgentComponent::FindPath(FVector2D startNode, FVector2D targetNode)
 {
 
+	TArray<FVector2D> resultPath = TArray<FVector2D>();
 
-	return TArray<FVector2D>();
+
+	resultPath = pathFindingInst->CalcPathToTarget(startNode, targetNode);
+
+
+	printf("count point path = %i", resultPath.Num());
+	return resultPath;
 }
 
