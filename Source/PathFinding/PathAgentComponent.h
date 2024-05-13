@@ -4,11 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "Components/TimelineComponent.h"
 
+#include "SplinePath.h"
 #include "PathSearchAStar.h"
 
 #include "PathAgentComponent.generated.h"
 
+
+class UCUrveFloat;
 
 USTRUCT(Blueprintable)
 struct FPointData
@@ -31,21 +35,40 @@ class PATHFINDING_API UPathAgentComponent : public USceneComponent
 	GENERATED_BODY()
 
 
+public:
+
+	
 private:
 
 	UPathSearchAStar* pathFindingInst;
 
+	//Timeline Properties//
+
+	FTimeline MovementTimeline;
+
+	UPROPERTY(EditAnywhere, Category = "PathFinding | Movement")
+	UCurveFloat* CurveMovement;
+
+
+	ASplinePath* pathToMove;
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DebugMode")
+	bool isDebugMode;
 
 public:	
-	// Sets default values for this component's properties
+	
 	UPathAgentComponent();
 
+
 protected:
-	// Called when the game starts
+	
 	virtual void BeginPlay() override;
 
+
 public:	
-	// Called every frame
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "PathFinding | Path")
@@ -53,7 +76,16 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "PathFinding | Path")
-	TArray<FVector2D> FindPath(FVector2D startNode, FVector2D targetNode);
+	TArray<FVector2D> FindPathToTarget(FVector2D startNode, FVector2D targetNode);
+
+	UFUNCTION(BlueprintCallable, Category = "PathFinding | Movement")
+	void MovementFromPath(TArray<FVector> LocpathPoints);
+
+
+	//Timeline Functions//
+
+	UFUNCTION()
+	void TimelineProgress(float valueCurve);
 
 
 };

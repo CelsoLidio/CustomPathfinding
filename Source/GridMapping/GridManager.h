@@ -25,7 +25,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grids")
 	TArray<UGridComponent*> allGrids;
 
-
 	//Methods//
 
 private:
@@ -46,7 +45,7 @@ private:
 	UGridComponent* FindGridAtLocation(FVector targetLoc);
 
 	
-
+	
 	
 
 protected:
@@ -95,6 +94,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "GridManager | Index Param | Tiles")
 	static FVector TileIndexToTileLocation(FVector2D idxTile, int idxGrid);
+
+	UFUNCTION(BlueprintPure, Category = "GridManager | Index Param | Tiles")
+	static TArray<FVector> TilesToLocations(TArray<FVector2D> listTiles, int idxGrid);
 
 	UFUNCTION(BlueprintPure, Category = "GridManager | Index Param | Tiles")
 	static TArray<FVector2D> GetAllTileFromGrid(int idxGrid);

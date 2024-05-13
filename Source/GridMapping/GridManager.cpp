@@ -11,7 +11,6 @@ AGridManager::AGridManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 //Virtuals Methods//
@@ -19,6 +18,7 @@ AGridManager::AGridManager()
 void AGridManager::BeginPlay()
 {
 	Super::BeginPlay();
+
 }
 
 
@@ -171,6 +171,11 @@ UGridComponent* AGridManager::GetGridFromIndex(int targetIdxGrid)
 
 	}
 	
+	if (targetIdxGrid >= managerGrid->allGrids.Num())
+	{
+		return nullptr;
+	}
+
 	if (IsValid(managerGrid->allGrids[targetIdxGrid]))
 	{
 		UGridComponent* outGrid = managerGrid->allGrids[targetIdxGrid];
@@ -286,9 +291,30 @@ FVector AGridManager::TileIndexToTileLocation(FVector2D idxTile, int idxGrid)
 	return currTile.worldLocation;
 }
 
+TArray<FVector> AGridManager::TilesToLocations(TArray<FVector2D> listTiles, int idxGrid)
+{
+	UGridComponent* currGrid = GetGridFromIndex(idxGrid);
+
+	TArray<FVector> resultLocations = TArray<FVector>();
+
+	for (FVector2D eachTile : listTiles)
+	{
+		FTilesData currTile = currGrid->GetTileData(eachTile);
+
+		resultLocations.Add(currTile.worldLocation);
+	}
+
+	return resultLocations;
+}
+
 TArray<FVector2D> AGridManager::GetAllTileFromGrid(int idxGrid)
 {
 	UGridComponent* currGrid = GetGridFromIndex(idxGrid);
+	
+	if (currGrid == nullptr)
+	{
+		return TArray<FVector2D>();
+	}
 
 	if (IsValid(currGrid))
 	{

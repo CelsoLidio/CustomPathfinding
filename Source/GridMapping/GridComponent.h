@@ -55,7 +55,10 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grid Properties | Tiles ")
 	float tileSize;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Debug")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Debug")
+	bool isDebugMode;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Debug", meta = (EditCondition = "isDebugMode"))
 	float debugThickness;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Tiles", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
@@ -103,7 +106,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Debug", meta= (AutoCreateRefTerm = "borderGridColor"))
-	void DrawGrid(const FLinearColor &borderGridColor);
+	void DrawGrid();
 	
 	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
 	FVector2D GetTileCount();

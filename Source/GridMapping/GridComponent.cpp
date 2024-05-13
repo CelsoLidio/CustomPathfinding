@@ -17,7 +17,7 @@ UGridComponent::UGridComponent()
 	tileSize = 50.0f;
 	debugThickness = 4.0f;
 	spacingTiles = 0.5f;
-
+	isDebugMode = false;
 	
 }
 
@@ -35,6 +35,11 @@ void UGridComponent::BeginPlay()
 	Super::BeginPlay();
 
 	AGridManager::AddGrid(this);
+	
+	if (isDebugMode)
+	{
+		DrawGrid();
+	}
 	
 }
 
@@ -151,7 +156,7 @@ TArray<FVector2D> UGridComponent::GetAllGridIdx()
 	return allGridIdx;
 }
 
-void UGridComponent::DrawGrid(const FLinearColor& borderGridColor)
+void UGridComponent::DrawGrid()
 {
 	
 	FlushPersistentDebugLines(GetWorld());
@@ -159,7 +164,7 @@ void UGridComponent::DrawGrid(const FLinearColor& borderGridColor)
 
 	FQuat gridRot = FQuat(GetOwner()->GetActorRotation());
 
-	DrawDebugBox(GetWorld(), gridLocation, gridWorldSize, gridRot, borderGridColor.ToFColor(true), true,-1,0.0f, debugThickness);
+	DrawDebugBox(GetWorld(), gridLocation, gridWorldSize, gridRot, FColor::Purple, true,-1,0.0f, debugThickness);
 
 	FVector sizeDebugPivot = FVector(10.0f, 10.0f, 5.0f) * GetOwner()->GetActorScale();
 	DrawDebugBox(GetWorld(), GetBottomPivot(), sizeDebugPivot, gridRot, FColor::Magenta, true,-1,0.0f, debugThickness);

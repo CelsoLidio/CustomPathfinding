@@ -9,16 +9,17 @@
 
 
 #define MAX_COST 999
+#define NORMAL_COST 1.0f
 
 USTRUCT()
 struct PATHFINDING_API FNodeBase
 {
 	GENERATED_BODY();
 
-	int nodeCost = 1;
-	int costFromStart = MAX_COST;
-	int costFinal = MAX_COST;
-	int estimatedCost = MAX_COST;
+	float nodeCost = NORMAL_COST;
+	float costFromStart = MAX_COST;
+	float costFinal = MAX_COST;
+	float estimatedCost = MAX_COST;
 	FVector2D previousNode = FVector2D::ZeroVector;
 
 
@@ -33,7 +34,11 @@ class PATHFINDING_API UPathSearchAStar : public UObject
 
 private:
 	TMap<FVector2D, FNodeBase> dictNodes;
+	
 
+public:
+
+	bool isDebugMode;
 private:
 
 	TArray<FVector2D> GetNodesNeighbours(FVector2D NodeIdx);
@@ -44,11 +49,13 @@ private:
 
 	TArray<FVector2D> RetracePath(FVector2D targetNode, FVector2D startNode);
 
+	void SetNodesToDefault();
+
 public:
 
 	void AddNode(FVector2D pointIdx, bool isAvailable);
 
-	TMap<FVector2D, FNodeBase> GetAllNodes();
+	TMap<FVector2D, FNodeBase>* GetAllNodes();
 
 
 	

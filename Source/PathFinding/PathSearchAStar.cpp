@@ -6,7 +6,37 @@
 
 #include "PrintStrings.h"
 
+void UPathSearchAStar::SetNodesToDefault()
+{
 
+	//create default//
+
+	FNodeBase defaultNode;
+
+	defaultNode.costFinal = MAX_COST;
+	defaultNode.costFromStart = MAX_COST;
+	defaultNode.estimatedCost = MAX_COST;
+	defaultNode.previousNode = FVector2D::ZeroVector;
+
+
+	TArray<FVector2D> keysNodes;
+
+	GetAllNodes()->GetKeys(keysNodes);
+
+	for (FVector2D eachKey : keysNodes)
+	{
+		FNodeBase* currNode = GetAllNodes()->Find(eachKey);
+
+		defaultNode.nodeCost = currNode->nodeCost;
+
+		currNode = &defaultNode;
+
+		GetAllNodes()->Add(eachKey, *currNode);
+
+	}
+
+
+}
 
 TArray<FVector2D> UPathSearchAStar::GetNodesNeighbours(FVector2D NodeIdx)
 {
@@ -20,25 +50,38 @@ TArray<FVector2D> UPathSearchAStar::GetNodesNeighbours(FVector2D NodeIdx)
 	fourDir.Add(FVector2D(0.0f, -1.0f));
 
 	TArray<FVector2D> diagonalDir;
-	diagonalDir.Add(FVector2D(1.0f, 0.0f));
-	diagonalDir.Add(FVector2D(0.0f, 1.0f));
-	diagonalDir.Add(FVector2D(-1.0f, 0.0f));
-	diagonalDir.Add(FVector2D(0.0f, -1.0f));
 	diagonalDir.Add(FVector2D(1.0f, 1.0f));
 	diagonalDir.Add(FVector2D(-1.0f, -1.0f));
 	diagonalDir.Add(FVector2D(1.0f, -1.0f));
 	diagonalDir.Add(FVector2D(-1.0f, 1.0f));
 
-	possibleNeighbours = diagonalDir;
+
+	for (FVector2D eachFour : fourDir)
+	{ 
+		possibleNeighbours.Add(eachFour);
+	} 
+	for (FVector2D eachDiagonal : diagonalDir)
+	{ 
+		possibleNeighbours.Add(eachDiagonal);
+	}
 
 	for (FVector2D eachNeighbour : possibleNeighbours)
 	{
 		FVector2D currNeighbour = NodeIdx + eachNeighbour;
 
-		if (GetAllNodes().Contains(currNeighbour))
+		if (GetAllNodes()->Contains(currNeighbour))
 		{
-			if (GetAllNodes().Find(currNeighbour)->nodeCost < MAX_COST)
+			if (GetAllNodes()->Find(currNeighbour)->nodeCost < MAX_COST)
 			{
+				if (diagonalDir.Contains(eachNeighbour))
+				{
+					FNodeBase* diagonalNode = GetAllNodes()->Find(currNeighbour);
+
+					diagonalNode->nodeCost = NORMAL_COST + (NORMAL_COST * 0.4);
+
+					GetAllNodes()->Add(currNeighbour, *diagonalNode);
+				}
+				
 				outNeighbours.AddUnique(currNeighbour);
 			}
 		}
@@ -65,21 +108,27 @@ void UPathSearchAStar::AddNode(FVector2D pointIdx, bool isAvailable)
 		newNode.nodeCost = MAX_COST;
 	}
 		
-	dictNodes.Add(pointIdx, newNode);
+	GetAllNodes()->Add(pointIdx, newNode);
 }
 
-TMap<FVector2D, FNodeBase> UPathSearchAStar::GetAllNodes()
+TMap<FVector2D, FNodeBase>* UPathSearchAStar::GetAllNodes()
 {
-	return dictNodes;
+	return &dictNodes;
 }
 
 TArray<FVector2D> UPathSearchAStar::CalcPathToTarget(FVector2D startNode, FVector2D targetNode)
 {
-
-	if (GetAllNodes().Find(targetNode)->nodeCost >= MAX_COST)
+	if (!GetAllNodes()->Contains(targetNode))
 	{
 		return TArray<FVector2D>();
 	}
+	
+	if (GetAllNodes()->Find(targetNode)->nodeCost >= MAX_COST)
+	{
+		return TArray<FVector2D>();
+	}
+	
+	SetNodesToDefault();
 
 	CalcStartingPoint(startNode, targetNode);
 
@@ -95,56 +144,24 @@ TArray<FVector2D> UPathSearchAStar::CalcPathToTarget(FVector2D startNode, FVecto
 	while (allOpenNodes.Num() > 0)
 	{
 		FVector2D lowestCostPoint = allOpenNodes[0];
-		printf("LOOP = %i", allOpenNodes.Num());
+		//printf("LOOP = %i", allOpenNodes.Num());
 
 		for (FVector2D eachOpen : allOpenNodes)
 		{
-			FNodeBase* openNode = GetAllNodes().Find(eachOpen);
-			FNodeBase* minorCostNode = GetAllNodes().Find(lowestCostPoint);
+			FNodeBase* openNode = GetAllNodes()->Find(eachOpen);
+			FNodeBase* minorCostNode = GetAllNodes()->Find(lowestCostPoint);
 
-			if (openNode->costFinal < minorCostNode->costFinal)
+			
+
+			if ((openNode->costFinal < minorCostNode->costFinal) ||
+				(openNode->costFinal == minorCostNode->costFinal && openNode->estimatedCost < minorCostNode->estimatedCost))
 			{
 				lowestCostPoint = eachOpen;
-			}
-			else
-			{
-				if (openNode->costFinal == minorCostNode->costFinal)
-				{
-					if (openNode->estimatedCost < minorCostNode->estimatedCost)
-					{
-						lowestCostPoint = eachOpen;
-					}
-					
-				}
-				
 			}
 			
 		}
 		
 		currentPoint = lowestCostPoint;		
-		
-		if (currentPoint == targetNode)
-		{
-			//final
-			
-			
-			TArray<FVector2D> resultPath = TArray<FVector2D>();
-			resultPath.Add(targetNode);
-			
-			FVector2D currentNodePath = targetNode;
-			FNodeBase pathNode = *GetAllNodes().Find(currentNodePath);
-
-			while (pathNode.previousNode != FVector2D::ZeroVector)
-			{
-				resultPath.Add(pathNode.previousNode);
-				currentNodePath = pathNode.previousNode;
-			}
-			resultPath.Reserve(resultPath.Num());
-			printf("ENTROU = %i", resultPath.Num());
-			
-			
-			return allOpenNodes;
-		}
 
 		allOpenNodes.Remove(currentPoint);
 		allClosedNodes.AddUnique(currentPoint);
@@ -159,31 +176,31 @@ TArray<FVector2D> UPathSearchAStar::CalcPathToTarget(FVector2D startNode, FVecto
 				continue;
 			}
 
-			FNodeBase* currNode = GetAllNodes().Find(currentPoint);
-			FNodeBase* neighbourNode = GetAllNodes().Find(neighbourPoint);
+			FNodeBase* currNode = GetAllNodes()->Find(currentPoint);
+			FNodeBase* neighbourNode = GetAllNodes()->Find(neighbourPoint);
 			
-			int costToNeighbour = currNode->costFromStart + GetEstimatedCostToTarget(neighbourPoint, currentPoint);//neighbourNode->nodeCost;
+			int costToNeighbour = currNode->costFromStart + neighbourNode->nodeCost;
 
-			
+			if (!allOpenNodes.Contains(neighbourPoint))
+			{
+				allOpenNodes.AddUnique(neighbourPoint);
+			}
 			
 			if (costToNeighbour < neighbourNode->costFromStart)
 			{
-				
+
 				neighbourNode->previousNode = currentPoint;
 				neighbourNode->costFromStart = costToNeighbour;
 				neighbourNode->estimatedCost = GetEstimatedCostToTarget(neighbourPoint, targetNode);
 				neighbourNode->costFinal = neighbourNode->costFromStart + neighbourNode->estimatedCost;
 				
 
-				GetAllNodes().Add(neighbourPoint, *neighbourNode);
+				GetAllNodes()->Add(neighbourPoint, *neighbourNode);
 
 			}
-			if (!allOpenNodes.Contains(neighbourPoint))
-			{
-				allOpenNodes.AddUnique(neighbourPoint);
-			}
+			
 
-			/*
+			
 			if (neighbourPoint == targetNode)
 			{
 				allOpenNodes.Empty();
@@ -192,7 +209,7 @@ TArray<FVector2D> UPathSearchAStar::CalcPathToTarget(FVector2D startNode, FVecto
 				return RetracePath(targetNode, startNode);
 
 			}
-			*/
+			
 		}
 
 	}
@@ -214,16 +231,21 @@ int UPathSearchAStar::GetEstimatedCostToTarget(FVector2D currentNode, FVector2D 
 
 void UPathSearchAStar::CalcStartingPoint(FVector2D startNode, FVector2D targetNode)
 {
-	FNodeBase startingPoint = *GetAllNodes().Find(startNode);
+	FNodeBase* startingPoint = GetAllNodes()->Find(startNode);
 
-	int valueEstimated = GetEstimatedCostToTarget(startNode, targetNode);
+	float valueEstimated = GetEstimatedCostToTarget(startNode, targetNode);
 
-	startingPoint.costFinal = valueEstimated;
-	startingPoint.costFromStart = 0;
-	startingPoint.estimatedCost = valueEstimated;
-	startingPoint.previousNode = FVector2D::ZeroVector;
+	if (isDebugMode)
+	{
+		printf("Estimated Cost To Target = %i", valueEstimated);
+	}
 
-	GetAllNodes().Add(startNode, startingPoint);
+	startingPoint->costFinal = valueEstimated;
+	startingPoint->costFromStart = 0;
+	startingPoint->estimatedCost = valueEstimated;
+	startingPoint->previousNode = FVector2D::ZeroVector;
+
+	GetAllNodes()->Add(startNode, *startingPoint);
 }
 
 TArray<FVector2D> UPathSearchAStar::RetracePath(FVector2D targetNode, FVector2D startNode)
@@ -235,16 +257,15 @@ TArray<FVector2D> UPathSearchAStar::RetracePath(FVector2D targetNode, FVector2D 
 
 	TArray<FVector2D> invertedPath = TArray<FVector2D>();
 	
-	FNodeBase* currNode = GetAllNodes().Find(currentPoint);
+	
 
-	while (currNode->previousNode != FVector2D::ZeroVector || currNode->previousNode != startNode)
+	while (currentPoint != startNode)
 	{
-		print("entroui")
 		invertedPath.AddUnique(currentPoint);
 
-		if (GetAllNodes().Contains(currentPoint))
+		if (GetAllNodes()->Contains(currentPoint))
 		{
-			currNode = GetAllNodes().Find(currentPoint);
+			FNodeBase* currNode = GetAllNodes()->Find(currentPoint);
 			currentPoint = currNode->previousNode;
 		}
 
@@ -260,3 +281,5 @@ TArray<FVector2D> UPathSearchAStar::RetracePath(FVector2D targetNode, FVector2D 
 
 	return outPath;
 }
+
+
