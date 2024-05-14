@@ -57,8 +57,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DebugMode")
 	bool isDebugMode;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PathFinding | Movement")
-	//FVector offsetMovement;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DebugMode")
+	bool inMovementAlongPath;
+
 
 public:	
 	
@@ -75,22 +76,22 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "PathFinding | Path")
-	void CreatePointNodes(FPointData pointNode);
+	void CreatePointNodes(TArray<FPointData> allNodes);
 
 
 	UFUNCTION(BlueprintCallable, Category = "PathFinding | Path")
-	TArray<FVector2D> FindPathToTarget(TArray<FPointData> allNodes, FVector2D startNode, FVector2D targetNode);
+	TArray<FVector2D> FindPathToTarget(FVector2D startNode, FVector2D targetNode);
 
 	UFUNCTION(BlueprintCallable, Category = "PathFinding | Location")
 	void MovementActorFromPath(TArray<FVector> LocpathPoints);
-
-	//UFUNCTION(BlueprintCallable, Category = "PathFinding | Location")
-	//void SetActor(TArray<FVector> LocpathPoints);
 
 	//Timeline Functions//
 
 	UFUNCTION()
 	void TimelineProgress(float valueCurve);
 
+
+	UFUNCTION()
+	void FinishedMovement();
 
 };

@@ -13,7 +13,7 @@ AMainController::AMainController()
 	bShowMouseCursor = true;
 	bEnableMouseOverEvents = true;
 	bEnableClickEvents = true;
-	
+	isDebugMode = true;
 }
 
 

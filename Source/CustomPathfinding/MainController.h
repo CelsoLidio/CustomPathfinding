@@ -26,11 +26,12 @@ class CUSTOMPATHFINDING_API AMainController : public APlayerController
 public:
 
 	//Mapping Input//
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Properties |Input")
 	UInputMappingContext* PlayerMappingInput;
 
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Player Properties | Debug")
+	bool isDebugMode;
 
 private:
 

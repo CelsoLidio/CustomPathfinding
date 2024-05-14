@@ -123,7 +123,8 @@ void UPathSearchAStar::ClearNodes()
 
 TArray<FVector2D> UPathSearchAStar::CalcPathToTarget(FVector2D startNode, FVector2D targetNode)
 {
-	if (GetAllNodes()->Num() <= 0)
+
+	if (GetAllNodes()->Num() <= 0 || targetNode == FVector2D::ZeroVector)
 	{
 		return TArray<FVector2D>();
 	}

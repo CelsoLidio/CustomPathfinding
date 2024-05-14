@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubSystems.h"
 
+#include "MainController.h"
 
 #include "MainPlayer.generated.h"
 
@@ -43,6 +44,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ClickAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* CursorPointAction;
+
+
 	//Variables//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = -90.0, ClampMax = 0.0))
 	float rotCameraYawMin;
@@ -50,8 +55,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = 0.0, ClampMax = 90.0))
 	float rotCameraYawMax;
 
+private:
+
+	//Variables//
+
+	FHitResult currHitRaycast;
+
+	AMainController* pController;
 
 private:
+
+	bool isRaycastHit();
+
 
 	//Actions Method//
 	void LookPlayer(const FInputActionValue& valueInput);
@@ -71,4 +86,7 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
 	void CursorRaycast(FVector impactPoint);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Input | Debug")
+	void CursorMovement(FVector impactPoint);
 };

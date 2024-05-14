@@ -19,7 +19,7 @@ UPathAgentComponent::UPathAgentComponent()
 	pathFindingInst = NewObject<UPathSearchAStar>();
 
 	isDebugMode = true;
-
+	inMovementAlongPath = false;
 	pathToMove = nullptr;
 }
 
@@ -41,8 +41,12 @@ void UPathAgentComponent::BeginPlay()
 		FOnTimelineFloat TimelineProgress;
 		TimelineProgress.BindUFunction(this, FName("TimelineProgress"));
 
-		MovementTimeline.AddInterpFloat(CurveMovement, TimelineProgress);
+		
+		FOnTimelineEvent FinishedFunc;
+		FinishedFunc.BindUFunction(this, FName("FinishedMovement"));
 
+		MovementTimeline.AddInterpFloat(CurveMovement, TimelineProgress);
+		MovementTimeline.SetTimelineFinishedFunc(FinishedFunc);
 	}
 	else
 	{
@@ -64,31 +68,27 @@ void UPathAgentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 }
 
-void UPathAgentComponent::CreatePointNodes(FPointData pointNode)
+void UPathAgentComponent::CreatePointNodes(TArray<FPointData> allNodes)
 {
-
-	pathFindingInst->AddNode(pointNode.pointIdx, pointNode.isAvailablePoint);
-
-}
-
-
-
-
-TArray<FVector2D> UPathAgentComponent::FindPathToTarget(TArray<FPointData> allNodes, FVector2D startNode, FVector2D targetNode)
-{
-
-	TArray<FVector2D> resultPath = TArray<FVector2D>();
-
+	pathFindingInst->ClearNodes();
 
 	for (FPointData eachPoint : allNodes)
 	{
 		pathFindingInst->AddNode(eachPoint.pointIdx, eachPoint.isAvailablePoint);
 	}
 
+}
+
+
+
+
+TArray<FVector2D> UPathAgentComponent::FindPathToTarget(FVector2D startNode, FVector2D targetNode)
+{
+
+	TArray<FVector2D> resultPath = TArray<FVector2D>();
 
 	resultPath = pathFindingInst->CalcPathToTarget(startNode, targetNode);
 
-	pathFindingInst->ClearNodes();
 
 	if (isDebugMode)
 	{
@@ -102,6 +102,11 @@ TArray<FVector2D> UPathAgentComponent::FindPathToTarget(TArray<FPointData> allNo
 void UPathAgentComponent::MovementActorFromPath(TArray<FVector> LocpathPoints)
 {
 	
+	if (CurveMovement == nullptr)
+	{
+		print("[ERROR - PathAgent] Curve Movement Path Not Found...")
+	}
+
 	APawn* actorOwner = nullptr;
 
 	if (Cast<ACharacter>(GetOwner()))
@@ -147,6 +152,8 @@ void UPathAgentComponent::MovementActorFromPath(TArray<FVector> LocpathPoints)
 		pathToMove->GetPath()->AddSplinePoint(eachPoint - offsetMovement,ESplineCoordinateSpace::World,true);
 	}
 
+	inMovementAlongPath = true;
+
 	MovementTimeline.PlayFromStart();
 
 }
@@ -186,3 +193,8 @@ void UPathAgentComponent::TimelineProgress(float valueCurve)
 
 }
 
+void UPathAgentComponent::FinishedMovement()
+{
+	pathToMove->Destroy();
+	inMovementAlongPath = false;
+}

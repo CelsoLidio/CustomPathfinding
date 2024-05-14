@@ -31,6 +31,7 @@ AMainPlayer::AMainPlayer()
 	rotCameraYawMin = -90;
 	rotCameraYawMax = 90;
 
+	pController = nullptr;
 }
 
 
@@ -40,18 +41,38 @@ void AMainPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	pController = Cast<AMainController>(GetController());
 }
 
 void AMainPlayer::OnConstruction(const FTransform& Transform)
 {
-	
-	//GetCharacterMovement()->GravityScale = 0.0f;
+
 }
 
 // Called every frame
 void AMainPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
+
+
+	if (IsValid(pController))
+	{
+		if (pController->isDebugMode)
+		{
+			FVector2D cursorPos = FVector2D::ZeroVector;
+			pController->GetMousePosition(cursorPos.X,cursorPos.Y);
+
+			if (isRaycastHit())
+			{
+				CursorMovement(currHitRaycast.ImpactPoint);
+			}
+		}
+
+		
+	}
+	
 
 }
 
@@ -70,6 +91,8 @@ void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 
 }
+
+
 
 
 void AMainPlayer::LookPlayer(const FInputActionValue& valueInput)
@@ -98,26 +121,37 @@ void AMainPlayer::RaycastClick(const FInputActionValue& valueInput)
 {
 	bool isClicked = valueInput.Get<bool>();
 
-	if (isClicked)
+	if (isClicked && isRaycastHit())
 	{
-		FHitResult hitCursor;
-		
-		APlayerController* pController = Cast<APlayerController>(GetController());
-		
-		pController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, hitCursor);
-
-		if (hitCursor.bBlockingHit)
-		{
-			//printf("actor Hit = %s", *hitCursor.ImpactPoint.ToString());
-
-			CursorRaycast(hitCursor.ImpactPoint);
-			
-		}
-		else
-		{
-			print("NOT hitted");
-		}
+		CursorRaycast(currHitRaycast.ImpactPoint);
 	}
 
 
+}
+
+
+
+bool AMainPlayer::isRaycastHit()
+{
+	
+	if (pController == nullptr)
+	{
+		return false;
+	}
+
+	pController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, false, currHitRaycast);
+
+	if (currHitRaycast.bBlockingHit)
+	{
+		//printf("actor Hit = %s", *hitCursor.ImpactPoint.ToString());
+		
+		return true;
+	}
+	else
+	{
+		return false;
+
+	}
+
+	return false;
 }

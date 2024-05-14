@@ -109,7 +109,6 @@ void UGridComponent::DrawAllTiles()
 
 void UGridComponent::CreateGridData()
 {
-	print("CRIANDO TILES...");
 
 	for (int gridX = 0; gridX <= GetTileCount().X; gridX++)
 	{
