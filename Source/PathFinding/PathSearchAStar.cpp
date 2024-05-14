@@ -248,7 +248,7 @@ void UPathSearchAStar::CalcStartingPoint(FVector2D startNode, FVector2D targetNo
 
 	if (isDebugMode)
 	{
-		printf("Estimated Cost To Target = %i", valueEstimated);
+		//printf("Estimated Cost To Target = %i", valueEstimated);
 	}
 
 	startingPoint->costFinal = valueEstimated;

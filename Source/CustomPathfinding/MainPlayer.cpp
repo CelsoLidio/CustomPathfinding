@@ -67,6 +67,7 @@ void AMainPlayer::Tick(float DeltaTime)
 			if (isRaycastHit())
 			{
 				CursorMovement(currHitRaycast.ImpactPoint);
+			
 			}
 		}
 

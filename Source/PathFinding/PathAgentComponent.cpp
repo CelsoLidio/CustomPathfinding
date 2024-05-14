@@ -92,7 +92,7 @@ TArray<FVector2D> UPathAgentComponent::FindPathToTarget(FVector2D startNode, FVe
 
 	if (isDebugMode)
 	{
-		printf("count cost to path = %i", resultPath.Num());
+		//printf("count cost to path = %i", resultPath.Num());
 	}
 
 
@@ -168,6 +168,11 @@ void UPathAgentComponent::TimelineProgress(float valueCurve)
 		actorOwner = Cast<APawn>(GetOwner());
 	}
 	else
+	{
+		return;
+	}
+
+	if (pathToMove == nullptr)
 	{
 		return;
 	}
