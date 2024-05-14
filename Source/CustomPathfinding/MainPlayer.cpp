@@ -40,8 +40,6 @@ void AMainPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	initPlayer();
-
 }
 
 void AMainPlayer::OnConstruction(const FTransform& Transform)
@@ -71,28 +69,6 @@ void AMainPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	}
 
 
-}
-
-void AMainPlayer::initPlayer()
-{
-	FVector initLoc = AGridManager::WorldLocationToTileLocation(GetActorLocation());
-	FVector gridLoc = AGridManager::GetLocationGrid(GetActorLocation());
-	
-
-	
-	SetActorLocation(initLoc);
-	FRotator lookAtGrid = (GetActorLocation() - gridLoc).Rotation().Clamp();
-
-	//printf("look at grid = %s", *lookAtGrid.ToString());
-	float offsetYaw= 90;
-
-	if (lookAtGrid.Yaw <= 270)
-	{
-		offsetYaw = -90;
-	}
-	
-	SetActorRotation(FRotator(GetActorRotation().Pitch, lookAtGrid.Yaw + offsetYaw, GetActorRotation().Roll));
-	
 }
 
 
@@ -135,13 +111,6 @@ void AMainPlayer::RaycastClick(const FInputActionValue& valueInput)
 			//printf("actor Hit = %s", *hitCursor.ImpactPoint.ToString());
 
 			CursorRaycast(hitCursor.ImpactPoint);
-
-			/*FVector tileLoc = AGridManager::WorldLocationToTileLocation(hitCursor.ImpactPoint);
-
-			FVector2D tileIdx = AGridManager::GetTileAtLocation(hitCursor.ImpactPoint);
-
-			printf("tile location = %s", *tileIdx.ToString())*/
-
 			
 		}
 		else

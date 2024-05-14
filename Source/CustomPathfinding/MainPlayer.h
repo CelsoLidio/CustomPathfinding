@@ -6,7 +6,6 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GridMapping/GridManager.h"
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubSystems.h"
@@ -69,9 +68,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void initPlayer();
 	
 	UFUNCTION(BlueprintImplementableEvent, Category = "Input")
 	void CursorRaycast(FVector impactPoint);

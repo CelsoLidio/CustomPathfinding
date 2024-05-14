@@ -46,7 +46,7 @@ private:
 
 	FTimeline MovementTimeline;
 
-	UPROPERTY(EditAnywhere, Category = "PathFinding | Movement")
+	UPROPERTY(EditAnywhere, Category = "PathFinding | Location")
 	UCurveFloat* CurveMovement;
 
 
@@ -56,6 +56,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DebugMode")
 	bool isDebugMode;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PathFinding | Movement")
+	//FVector offsetMovement;
 
 public:	
 	
@@ -76,11 +79,13 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, Category = "PathFinding | Path")
-	TArray<FVector2D> FindPathToTarget(FVector2D startNode, FVector2D targetNode);
+	TArray<FVector2D> FindPathToTarget(TArray<FPointData> allNodes, FVector2D startNode, FVector2D targetNode);
 
-	UFUNCTION(BlueprintCallable, Category = "PathFinding | Movement")
-	void MovementFromPath(TArray<FVector> LocpathPoints);
+	UFUNCTION(BlueprintCallable, Category = "PathFinding | Location")
+	void MovementActorFromPath(TArray<FVector> LocpathPoints);
 
+	//UFUNCTION(BlueprintCallable, Category = "PathFinding | Location")
+	//void SetActor(TArray<FVector> LocpathPoints);
 
 	//Timeline Functions//
 

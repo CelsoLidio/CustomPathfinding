@@ -44,26 +44,32 @@ class GRIDMAPPING_API UGridComponent : public USceneComponent
 
 private:
 
+	//Grid Properties//
 	UPROPERTY()
 	FVector gridLocation;
 
 	UPROPERTY()
 	FVector gridWorldSize;
 
+	TMap<FVector2D, FTilesData> tilesData;
+
 public:
 	
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grid Properties | Tiles ")
-	float tileSize;
-
+	//Debug properties//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Debug")
 	bool isDebugMode;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Debug", meta = (EditCondition = "isDebugMode"))
 	float debugThickness;
 
+	//Tiles Properties//
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grid Properties | Tiles", meta = (ClampMin = 0.0f, ClampMax = 1.0f))
 	float spacingTiles;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Tiles ")
+	float tileSize;
+
+	//Collisions Properties//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Collision")
 	TEnumAsByte<ETraceTypeQuery> groundChannel;
 
@@ -71,8 +77,6 @@ public:
 	TEnumAsByte<ETraceTypeQuery> obstacleChannel;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid Properties | Tiles")
-	TMap<FVector2D,FTilesData> tilesData;
 	
 	//Methods//
 public:	
@@ -83,46 +87,76 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-	//Create Grid//
+	//Constructor Grid Methods//
+
+		//Create Grid//
 	void InitGrid();
 
-	//Get new Pivot Grid//
+		//Create All Datas Grid//
+	void CreateGridData();
+
+		//Get new Pivot Grid//
 	FVector GetBottomPivot();
 
-	//Draw Debug Tiles//
+	//Debug//
+	
+		//Draw Debug Tiles//	
 	void DrawAllTiles();
 
-	
 
 public:	
 	
+	//Virtual Methods//
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void OnComponentCreated() override;
 
+	//Public Methods//
 
+	FTilesData GetClosestTile(FVector targetPosition, bool isOnlyValid = true);
 
+	bool IsTileCollision(FVector locationTile, ETraceTypeQuery traceChannel);
+
+	FTilesData GetTileData(FVector2D indexTile);
+
+	
 public:
 
-
-	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Debug", meta= (AutoCreateRefTerm = "borderGridColor"))
+	//Blueprint Methods//
+		
+		//Debug Mthods//
+	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Debug")
 	void DrawGrid();
 	
+		//Tiles Methods//
 	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
 	FVector2D GetTileCount();
 
-	UFUNCTION(BlueprintPure, Category = "Grid Properties | Collision")
-	bool IsTileCollision(FVector locationTile, ETraceTypeQuery traceChannel);
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
+	FVector2D GetTileAtLocation(FVector worldLocation);
+	
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
+	TArray<FVector> GetAllLocationsTiles();
 
-	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
-	void CreateGridData();
 
-	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
-	FTilesData GetClosestTile(FVector targetPosition, bool isOnlyValid = true);
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
+	FVector GetLocationTile(FVector2D indexTile);
 
-	UFUNCTION(BlueprintCallable, Category = "Grid Properties | Tiles")
-	FTilesData GetTileData(FVector2D idxTile);
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
+	TArray<FVector> TilesToLocations(TArray<FVector2D> listTiles);
 
+
+
+		//Verify Methods//
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
+	bool isTileAvailableAtLocation(FVector worldLocation);
+
+	UFUNCTION(BlueprintPure, Category = "Grid Properties | Tiles")
+	bool isTileAvailable(FVector2D indexTile);
+
+
+		//Grid Methods//
 
 	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
 	bool IsAvailableGrid();
@@ -131,7 +165,8 @@ public:
 	FVector GetGridLocation();
 
 	UFUNCTION(BlueprintPure, Category = "Grid Properties | Grid")
-	TArray<FVector2D> GetAllGridIdx();
+	TArray<FVector2D> GetAllTilesGrid();
+	
 
 
 };

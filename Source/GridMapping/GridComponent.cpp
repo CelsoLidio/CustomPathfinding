@@ -18,7 +18,8 @@ UGridComponent::UGridComponent()
 	debugThickness = 4.0f;
 	spacingTiles = 0.5f;
 	isDebugMode = false;
-	
+	groundChannel = ETraceTypeQuery::TraceTypeQuery3;
+	obstacleChannel = ETraceTypeQuery::TraceTypeQuery4;
 }
 
 
@@ -27,7 +28,7 @@ UGridComponent::UGridComponent()
 void UGridComponent::OnComponentCreated()
 {
 	InitGrid();
-	CreateGridData();
+
 }
 
 void UGridComponent::BeginPlay()
@@ -41,6 +42,7 @@ void UGridComponent::BeginPlay()
 		DrawGrid();
 	}
 	
+	InitGrid();
 }
 
 void UGridComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -56,7 +58,7 @@ void UGridComponent::InitGrid()
 	gridLocation = GetOwner()->GetActorLocation();
 	gridWorldSize = FVector(100.0f, 100.0f,5.0f) * GetOwner()->GetActorScale();
 
-	
+	CreateGridData();
 }
 
 FVector UGridComponent::GetBottomPivot()
@@ -107,7 +109,7 @@ void UGridComponent::DrawAllTiles()
 
 void UGridComponent::CreateGridData()
 {
-
+	print("CRIANDO TILES...");
 
 	for (int gridX = 0; gridX <= GetTileCount().X; gridX++)
 	{
@@ -148,7 +150,7 @@ void UGridComponent::CreateGridData()
 
 }
 
-TArray<FVector2D> UGridComponent::GetAllGridIdx()
+TArray<FVector2D> UGridComponent::GetAllTilesGrid()
 {
 	TArray<FVector2D> allGridIdx;
 	tilesData.GetKeys(allGridIdx);
@@ -221,6 +223,62 @@ FVector UGridComponent::GetGridLocation()
 	return gridLocation;
 }
 
+FVector2D UGridComponent::GetTileAtLocation(FVector worldLocation)
+{
+	return GetClosestTile(worldLocation).gridIdx;
+}
+
+TArray<FVector> UGridComponent::GetAllLocationsTiles()
+{
+	TArray<FVector> outLocations = TArray<FVector>();
+
+	for (FVector2D eachTile : GetAllTilesGrid())
+	{
+		outLocations.Add(GetLocationTile(eachTile));
+	}
+
+	return outLocations;
+}
+
+FVector UGridComponent::GetLocationTile(FVector2D indexTile)
+{
+	FTilesData currTile = GetTileData(indexTile);
+
+	return currTile.worldLocation;
+}
+
+TArray<FVector> UGridComponent::TilesToLocations(TArray<FVector2D> listTiles)
+{
+
+	TArray<FVector> resultLocations = TArray<FVector>();
+
+	for (FVector2D eachTile : listTiles)
+	{
+		FTilesData currTile = GetTileData(eachTile);
+
+		resultLocations.Add(currTile.worldLocation);
+	}
+
+	return resultLocations;
+}
+
+bool UGridComponent::isTileAvailable(FVector2D indexTile)
+{
+	return isTileAvailableAtLocation(GetLocationTile(indexTile));
+}
+
+bool UGridComponent::isTileAvailableAtLocation(FVector worldLocation)
+{
+	FTilesData currTile = GetClosestTile(worldLocation,false);
+
+	if (currTile.isAvailable && !currTile.isObstacle)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 FTilesData UGridComponent::GetClosestTile(FVector targetPosition, bool isOnlyValid)
 {
 	TArray<FVector2D> tilesIdx;
@@ -269,8 +327,8 @@ FTilesData UGridComponent::GetClosestTile(FVector targetPosition, bool isOnlyVal
 	return resultTile;
 }
 
-FTilesData UGridComponent::GetTileData(FVector2D idxTile)
+FTilesData UGridComponent::GetTileData(FVector2D indexTile)
 {
-	return *tilesData.Find(idxTile);
+	return *tilesData.Find(indexTile);
 }
 

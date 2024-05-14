@@ -41,7 +41,7 @@ UGridComponent* AGridManager::FindGridAtLocation(FVector targetLoc)
 	}
 
 	UGridComponent* currGrid = nullptr;
-
+	
 	float minorDist = TNumericLimits<float>::Max();
 
 	for (UGridComponent* eachGrid : allGrids)
@@ -63,7 +63,7 @@ UGridComponent* AGridManager::FindGridAtLocation(FVector targetLoc)
 		}
 
 	}
-
+	
 	return currGrid;
 
 }
@@ -82,6 +82,7 @@ int AGridManager::FindGridIndexAtLocation(FVector worldLocation)
 
 	return -1;
 }
+
 
 	//Static Methods//
 
@@ -115,6 +116,11 @@ AGridManager* AGridManager::GetGridManager()
 	return managerRef;
 }
 
+
+//Public Methos//
+
+	//Static Mehods//
+
 UGridComponent* AGridManager::GetGridAtLocation(FVector worldLocation)
 {
 	AGridManager* managerGrid = GetGridManager();
@@ -127,78 +133,41 @@ UGridComponent* AGridManager::GetGridAtLocation(FVector worldLocation)
 
 	UGridComponent* outGrid = managerGrid->FindGridAtLocation(worldLocation);
 
+	if (outGrid->isDebugMode)
+	{
+		outGrid->DrawGrid();
+	}
+	
 	return outGrid;
 	
 
 }
 
-int AGridManager::GetGridIndex(FVector worldLocation)
+TArray<UGridComponent*> AGridManager::GetAllGrids()
 {
 	AGridManager* managerGrid = GetGridManager();
 
 	if (!IsValid(managerGrid))
 	{
-		return -1;
+		return TArray<UGridComponent*>();
 
 	}
 
-	int idxGrid = managerGrid->FindGridIndexAtLocation(worldLocation);
-
-	return idxGrid;
+	return managerGrid->allGrids;
 }
 
-
-FTilesData AGridManager::GetTileFromWorldLoc(FVector worldLocation, bool isOnlyValid)
+UGridComponent* AGridManager::GetGridAtIndex(int indexGrid)
 {
-	UGridComponent* currGrid = GetGridAtLocation(worldLocation);
+	UGridComponent* currGrid = GetAllGrids()[indexGrid];
 
-	if (IsValid(currGrid))
-	{
-
-		return currGrid->GetClosestTile(worldLocation, isOnlyValid);
-	}
-
-	return FTilesData();
-}
-
-UGridComponent* AGridManager::GetGridFromIndex(int targetIdxGrid)
-{
-	AGridManager* managerGrid = GetGridManager();
-
-	if (!IsValid(managerGrid) || managerGrid->allGrids.Num() <= 0)
-	{
-		return nullptr;
-
-	}
-	
-	if (targetIdxGrid >= managerGrid->allGrids.Num())
+	if (!IsValid(currGrid))
 	{
 		return nullptr;
 	}
 
-	if (IsValid(managerGrid->allGrids[targetIdxGrid]))
-	{
-		UGridComponent* outGrid = managerGrid->allGrids[targetIdxGrid];
-
-		if (!IsValid(outGrid))
-		{
-			return nullptr;
-		}
-
-		return outGrid;
-	}
-
-	return nullptr;
-	
+	return currGrid;
 }
 
-
-//Public Methods//
-
-	//Static Methods//
-
-
-		//Input World Location//
 void AGridManager::AddGrid(UGridComponent* newGrid)
 {
 
@@ -215,10 +184,10 @@ void AGridManager::AddGrid(UGridComponent* newGrid)
 	managerGrid->allGrids.Add(newGrid);
 }
 
-FVector AGridManager::GetLocationGrid(FVector targetLoc)
+FVector AGridManager::GetLocationGrid(FVector worldLocation)
 {
 
-	UGridComponent* currGrid = GetGridAtLocation(targetLoc);
+	UGridComponent* currGrid = GetGridAtLocation(worldLocation);
 
 	if (IsValid(currGrid))
 	{
@@ -229,100 +198,7 @@ FVector AGridManager::GetLocationGrid(FVector targetLoc)
 	return FVector::ZeroVector;
 }
 
-FVector AGridManager::WorldLocationToTileLocation(FVector worldLocation)
-{	
-	return GetTileFromWorldLoc(worldLocation).worldLocation;
-}
 
-FVector2D AGridManager::GetTileAtLocation(FVector worldLocation)
-{
-	return GetTileFromWorldLoc(worldLocation).gridIdx;
-
-
-}
-
-TArray<FVector2D> AGridManager::GetAllTileAtLocation(FVector worldLocation)
-{
-	UGridComponent* currGrid = GetGridAtLocation(worldLocation);
-
-	if (IsValid(currGrid))
-	{
-		return currGrid->GetAllGridIdx();
-	}
-
-	return TArray<FVector2D>();
-}
-
-bool AGridManager::isTileAvailableFromLoc(FVector worldLocation)
-{
-	FTilesData currTile = GetTileFromWorldLoc(worldLocation, true);
-
-	if (currTile.isAvailable && !currTile.isObstacle)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-
-		//Input Index Tile and Index Grid//
-
-bool AGridManager::isTileAvailable(FVector2D idxTile, int idxGrid)
-{
-	UGridComponent* currGrid = GetGridFromIndex(idxGrid);
-
-	FTilesData currTile = currGrid->GetTileData(idxTile);
-
-	if (currTile.isAvailable && !currTile.isObstacle)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-FVector AGridManager::TileIndexToTileLocation(FVector2D idxTile, int idxGrid)
-{
-	UGridComponent* currGrid = GetGridFromIndex(idxGrid);
-
-	FTilesData currTile = currGrid->GetTileData(idxTile);
-
-	return currTile.worldLocation;
-}
-
-TArray<FVector> AGridManager::TilesToLocations(TArray<FVector2D> listTiles, int idxGrid)
-{
-	UGridComponent* currGrid = GetGridFromIndex(idxGrid);
-
-	TArray<FVector> resultLocations = TArray<FVector>();
-
-	for (FVector2D eachTile : listTiles)
-	{
-		FTilesData currTile = currGrid->GetTileData(eachTile);
-
-		resultLocations.Add(currTile.worldLocation);
-	}
-
-	return resultLocations;
-}
-
-TArray<FVector2D> AGridManager::GetAllTileFromGrid(int idxGrid)
-{
-	UGridComponent* currGrid = GetGridFromIndex(idxGrid);
-	
-	if (currGrid == nullptr)
-	{
-		return TArray<FVector2D>();
-	}
-
-	if (IsValid(currGrid))
-	{
-		return currGrid->GetAllGridIdx();
-	}
-
-	return TArray<FVector2D>();
-}
 
 	
 

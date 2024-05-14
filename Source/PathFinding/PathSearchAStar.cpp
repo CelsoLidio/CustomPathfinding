@@ -116,8 +116,18 @@ TMap<FVector2D, FNodeBase>* UPathSearchAStar::GetAllNodes()
 	return &dictNodes;
 }
 
+void UPathSearchAStar::ClearNodes()
+{
+	GetAllNodes()->Empty();
+}
+
 TArray<FVector2D> UPathSearchAStar::CalcPathToTarget(FVector2D startNode, FVector2D targetNode)
 {
+	if (GetAllNodes()->Num() <= 0)
+	{
+		return TArray<FVector2D>();
+	}
+
 	if (!GetAllNodes()->Contains(targetNode))
 	{
 		return TArray<FVector2D>();

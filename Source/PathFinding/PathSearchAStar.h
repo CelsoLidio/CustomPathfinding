@@ -39,6 +39,8 @@ private:
 public:
 
 	bool isDebugMode;
+
+
 private:
 
 	TArray<FVector2D> GetNodesNeighbours(FVector2D NodeIdx);
@@ -57,7 +59,7 @@ public:
 
 	TMap<FVector2D, FNodeBase>* GetAllNodes();
 
-
+	void ClearNodes();
 	
 
 	TArray<FVector2D> CalcPathToTarget(FVector2D startNode, FVector2D targetNode);
